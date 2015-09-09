@@ -25,10 +25,17 @@ class GiftCardsController < StateController
   end
 
   def create
-    @gift_card = GiftCard.new(gift_card_params)
-    @gift_card.user = current_user
-    authorize @gift_card
-    @gift_card.save
+    @max_retries = 3
+    total_gift_cards = params[:number].to_i
+    while total_gift_cards > 0
+      begin
+        @gift_card = GiftCard.new(gift_card_params)
+        @gift_card.user = current_user
+        authorize @gift_card
+        @gift_card.save!
+        total_gift_cards -= 1
+      end
+    end
     respond_with @gift_card, location: -> { root_path }
   end
 
@@ -53,6 +60,7 @@ class GiftCardsController < StateController
     authorize @gift_card
     return render json: { error: 'no_value', message: t('.no_value') }, status: 422 unless params[:value].present?
     return render json: { error: 'wrong_value', message: t('.wrong_value') }, status: 422 unless params[:value].to_i == @gift_card.value.to_i
+    return render json: { error: 'expired', message: t('.expired') }, status: 422 if @gift_card.state?(:expired)
     return render json: { error: 'cant_redeem', message: t('.cant_redeem') }, status: 422 unless @gift_card.can_redeem?
     transition_state(:redeem)
   end
@@ -64,7 +72,7 @@ class GiftCardsController < StateController
   private
 
   def gift_card_params
-    params.require(:gift_card).permit(*policy(@gift_card || GiftCard.new).permitted_attributes)
+    params.require(:gift_card).permit(:value, :expiration_days, :company_id)
   end
 
   def set_gift_card

@@ -1,6 +1,11 @@
 - content_for :title do
   = t('helpers.submit.create', model: GiftCard.model_name.human)
 = simple_form_for @gift_card do |form|
-  = form.input :code
-  = form.input :value
-  = form.button :submit
+	= label_tag(:number, "* Number")
+	= text_field_tag(:number)
+	= form.input :value
+	= form.input :expiration_days
+	= label_tag :company, 'Company'
+	= select("gift_card", "company_id", Company.all.collect {|c| [ c.name, c.id ] })
+	= form.button :submit
+	

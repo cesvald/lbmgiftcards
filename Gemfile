@@ -29,11 +29,20 @@ gem 'coffee-rails'
 gem 'uglifier'
 gem 'jquery-rails'
 gem 'simple_form'
+gem 'rails-backbone'
 
 group :test, :development do
   gem 'letter_opener'
   gem 'spring'
   gem 'better_errors'
+  gem 'rspec-rails'
+end
+
+group :test do
+  gem 'database_cleaner'
+  gem 'shoulda'
+  gem 'factory_girl_rails'
+  gem 'capybara',   '2.2.0'
 end
 
 group :production do

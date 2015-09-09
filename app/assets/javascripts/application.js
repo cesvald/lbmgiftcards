@@ -13,6 +13,11 @@
 //= require jquery
 //= require jquery_ujs
 //= require foundation
+//= require underscore
+//= require backbone
+//= require backbone_rails_sync
+//= require backbone_datalink
+//= require backbone/lbm_gift_cards
 //= require_tree .
 
 $(function(){ $(document).foundation(); });
