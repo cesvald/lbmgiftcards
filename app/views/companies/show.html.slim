@@ -1,0 +1,12 @@
+p#notice = notice
+
+p
+  strong Name:
+  = @company.name
+p
+  strong Gift card template:
+  = @company.gift_card_template
+
+= link_to 'Edit', edit_company_path(@company)
+'|
+= link_to 'Back', companies_path

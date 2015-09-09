@@ -1,5 +1,7 @@
 Rails.application.routes.draw do
 
+  resources :companies
+
   devise_for :users
 
   resources :gift_cards, only: [:new, :create] do

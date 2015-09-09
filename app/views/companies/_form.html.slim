@@ -1,0 +1,9 @@
+= simple_form_for(@company) do |f|
+  = f.error_notification
+
+  .form-inputs
+    = f.input :name
+    = f.input :gift_card_template
+
+  .form-actions
+    = f.button :submit
