@@ -9,6 +9,8 @@ class GiftCardsController < StateController
   respond_to :json, only: %i[redeem]
 
   def index
+    expired_gift_cards = GiftCard.expired
+    expired_gift_cards.update_all state: 'expired'
     @gift_cards = policy_scope(GiftCard)
     respond_with @gift_cards
   end
@@ -60,6 +62,10 @@ class GiftCardsController < StateController
     authorize @gift_card
     return render json: { error: 'no_value', message: t('.no_value') }, status: 422 unless params[:value].present?
     return render json: { error: 'wrong_value', message: t('.wrong_value') }, status: 422 unless params[:value].to_i == @gift_card.value.to_i
+    if @gift_card.state?(:pending) && @gift_card.expiration_date < Date.today
+      @gift_card.expire!
+      return render json: { error: 'expired', message: t('.expired') }, status: 422 
+    end
     return render json: { error: 'expired', message: t('.expired') }, status: 422 if @gift_card.state?(:expired)
     return render json: { error: 'cant_redeem', message: t('.cant_redeem') }, status: 422 unless @gift_card.can_redeem?
     transition_state(:redeem)
@@ -72,7 +78,7 @@ class GiftCardsController < StateController
   private
 
   def gift_card_params
-    params.require(:gift_card).permit(:value, :expiration_days, :company_id)
+    params.require(:gift_card).permit(:value, :expiration_date, :company_id)
   end
 
   def set_gift_card

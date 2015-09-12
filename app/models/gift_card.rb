@@ -9,6 +9,8 @@ class GiftCard < ActiveRecord::Base
   after_initialize :set_initial_code
   before_validation :parameterize_code
 
+  scope :expired, ->() { where("gift_cards.expiration_date < ? AND state = ?", Date.today, 'pending') }
+
   state_machine initial: :pending do
 
     state :pending

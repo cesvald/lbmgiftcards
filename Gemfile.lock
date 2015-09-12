@@ -85,6 +85,9 @@ GEM
     foundation-rails (5.5.0.0)
       railties (>= 3.1.0)
       sass (>= 3.2.0, < 3.4)
+    has_scope (0.6.0)
+      actionpack (>= 3.2, < 5)
+      activesupport (>= 3.2, < 5)
     heroku-deflater (0.5.3)
       rack (>= 1.4.5)
     hike (1.2.3)
@@ -231,6 +234,7 @@ DEPENDENCIES
   devise-i18n-views!
   factory_girl_rails
   foundation-rails
+  has_scope
   heroku-deflater (>= 0.4.1)
   jquery-rails
   letter_opener

@@ -31,6 +31,9 @@ gem 'jquery-rails'
 gem 'simple_form'
 gem 'rails-backbone'
 
+# Other tools
+gem 'has_scope'
+
 group :test, :development do
   gem 'letter_opener'
   gem 'spring'
