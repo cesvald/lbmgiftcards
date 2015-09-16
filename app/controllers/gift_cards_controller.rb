@@ -46,20 +46,8 @@ class GiftCardsController < StateController
         @gift_card = GiftCard.new(gift_card_params)
         @gift_card.user = current_user
         authorize @gift_card
-        @gift_card.save
-        if @gift_card
-          puts @gift_card.errors.inspect
-          raise ActiveRecord::RecordNotSaved, 'error'
-        end
+        @gift_card.save!
         total_gift_cards -= 1
-      rescue ActiveRecord::RecordNotSaved
-        @token_attempts = @token_attempts.to_i + 1
-        puts "token attempts: " + @token_attempts.to_s
-        retry if @token_attempts < @max_retries
-        flash[:notice] = 'No fue posible generar un código válido ' + ((params[:number].to_i - total_gift_cards).to_i).to_s
-        respond_with @gift_card, location: -> { root_path }
-        return
-      end
     end
     redirect_to fisical_gift_cards_path(:format => 'pdf', :last_gift_cards => params[:number].to_i, :id => @gift_card.code)
   end
@@ -67,7 +55,7 @@ class GiftCardsController < StateController
   def fisical
     authorize @gift_card
     @gift_cards = apply_scopes(GiftCard)
-    @company = @gift_cards.first.company.gift_card_template_url.nil? ? Company.first : @gift_cards.first.company
+    @company = @gift_cards.first.company.gift_card_template_url.nil? ? Company.where("gift_card_template IS NOT NULL").first : @gift_cards.first.company
     p "gift cards size: " + @company.gift_card_template_url
     respond_to do |format|
       format.html do
