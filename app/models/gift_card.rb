@@ -40,7 +40,12 @@ class GiftCard < ActiveRecord::Base
   private
 
   def set_initial_code
-    company_code = self.company.present? ? self.company.code : Company.first.code
+    company_code = ""
+    if self.company.present?
+      company_code = self.company.code
+    else
+      company_code = Company.first.nil? ? "" : Company.first.code
+    end
     self.code = "#{company_code}-#{SecureRandom.hex(3)}" unless self.code.present?
   end
 
