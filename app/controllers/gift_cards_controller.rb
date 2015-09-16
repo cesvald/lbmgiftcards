@@ -48,6 +48,7 @@ class GiftCardsController < StateController
         authorize @gift_card
         @gift_card.save!
         total_gift_cards -= 1
+      end
     end
     redirect_to fisical_gift_cards_path(:format => 'pdf', :last_gift_cards => params[:number].to_i, :id => @gift_card.code)
   end
