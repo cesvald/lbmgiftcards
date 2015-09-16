@@ -8,4 +8,3 @@
 	= label_tag :company, 'Company'
 	= select("gift_card", "company_id", Company.all.collect {|c| [ c.name, c.id ] })
 	= form.button :submit
-	

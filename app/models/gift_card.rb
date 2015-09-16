@@ -12,7 +12,7 @@ class GiftCard < ActiveRecord::Base
 
   scope :expired, ->() { where("gift_cards.expiration_date < ? AND state = ?", Date.today, 'pending') }
   scope :last_gift_cards, ->(last) { GiftCard.last(last) }
-  
+
   state_machine initial: :pending do
 
     state :pending

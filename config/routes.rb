@@ -11,6 +11,7 @@ Rails.application.routes.draw do
     end
     collection do
       get :fisical
+      post :multiple_create
     end
   end
 

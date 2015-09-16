@@ -29,22 +29,34 @@ class GiftCardsController < StateController
   end
 
   def create
+    @gift_card = GiftCard.new(gift_card_params)
+    @gift_card.user = current_user
+    authorize @gift_card
+
     total_gift_cards = params[:number].to_i
+
+    if !@gift_card.valid?
+      respond_with @gift_card, location: -> { new_gift_card_path }
+      return
+    end
+
     @max_retries = total_gift_cards/100 >= 3 ? total_gift_cards/100 * 3 : 3
-    puts "total_gift_cards: " + total_gift_cards.to_s
     while total_gift_cards > 0
       begin
         @gift_card = GiftCard.new(gift_card_params)
         @gift_card.user = current_user
         authorize @gift_card
-        @gift_card.save!
+        @gift_card.save
+        if @gift_card
+          puts @gift_card.errors.inspect
+          raise ActiveRecord::RecordNotSaved, 'error'
+        end
         total_gift_cards -= 1
-        puts "remaining gift cards: " + total_gift_cards.to_s
-      rescue
+      rescue ActiveRecord::RecordNotSaved
         @token_attempts = @token_attempts.to_i + 1
         puts "token attempts: " + @token_attempts.to_s
         retry if @token_attempts < @max_retries
-        flash[:notice] = 'Los intentos por crear un código único se agotaron, el máximo número de códigos creados fueron ' + ((params[:number].to_i - total_gift_cards).to_i).to_s
+        flash[:notice] = 'No fue posible generar un código válido ' + ((params[:number].to_i - total_gift_cards).to_i).to_s
         respond_with @gift_card, location: -> { root_path }
         return
       end
