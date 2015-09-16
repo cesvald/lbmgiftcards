@@ -4,7 +4,8 @@
   .form-inputs
     = f.input :name
     = f.input :code
-    = f.input :gift_card_template
+    = f.file_field :gift_card_template
+    = f.hidden_field :gift_card_template_cache
 
   .form-actions
     = f.button :submit

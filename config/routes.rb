@@ -9,6 +9,9 @@ Rails.application.routes.draw do
       put :redeem
       put :invalidate
     end
+    collection do
+      get :fisical
+    end
   end
 
   resources :users, only: [:index] do

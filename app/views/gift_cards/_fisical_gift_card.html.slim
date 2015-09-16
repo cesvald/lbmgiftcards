@@ -1,0 +1,6 @@
+.gift_card_template_container
+	= wicked_pdf_image_tag company_url
+  	p.gift_card_template_value
+  		= number_to_currency fisical_gift_card.value, :precision => 0
+  	p.gift_card_template_code
+  		= fisical_gift_card.code

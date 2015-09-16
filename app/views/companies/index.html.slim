@@ -13,7 +13,7 @@ table
     - @companies.each do |company|
       tr
         td = company.name
-        td = company.gift_card_template
+        td = image_tag company.gift_card_template_url(:thumb).to_s
         td = link_to 'Show', company
         td = link_to 'Edit', edit_company_path(company)
         td = link_to 'Destroy', company, data: {:confirm => 'Are you sure?'}, :method => :delete

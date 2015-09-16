@@ -1,12 +1,14 @@
 class GiftCardsController < StateController
   
-  before_action :set_gift_card, except: %i[index new create]
+  before_action :set_gift_card, except: [:index, :create, :new]
 
-  after_action :verify_authorized, except: %i[index]
-  after_action :verify_policy_scoped, only: %i[index]
+  after_action :verify_authorized, except: [:index]
+  after_action :verify_policy_scoped, only: [:index]
 
-  respond_to :html, except: %i[redeem]
-  respond_to :json, only: %i[redeem]
+  respond_to :html, except: [:redeem]
+  respond_to :json, only: [:redeem]
+
+  has_scope :last_gift_cards
 
   def index
     expired_gift_cards = GiftCard.expired
@@ -27,8 +29,9 @@ class GiftCardsController < StateController
   end
 
   def create
-    @max_retries = 3
     total_gift_cards = params[:number].to_i
+    @max_retries = total_gift_cards/100 >= 3 ? total_gift_cards/100 * 3 : 3
+    puts "total_gift_cards: " + total_gift_cards.to_s
     while total_gift_cards > 0
       begin
         @gift_card = GiftCard.new(gift_card_params)
@@ -36,9 +39,32 @@ class GiftCardsController < StateController
         authorize @gift_card
         @gift_card.save!
         total_gift_cards -= 1
+        puts "remaining gift cards: " + total_gift_cards.to_s
+      rescue
+        @token_attempts = @token_attempts.to_i + 1
+        puts "token attempts: " + @token_attempts.to_s
+        retry if @token_attempts < @max_retries
+        flash[:notice] = 'Los intentos por crear un código único se agotaron, el máximo número de códigos creados fueron ' + ((params[:number].to_i - total_gift_cards).to_i).to_s
+        respond_with @gift_card, location: -> { root_path }
+        return
       end
     end
-    respond_with @gift_card, location: -> { root_path }
+    redirect_to fisical_gift_cards_path(:format => 'pdf', :last_gift_cards => params[:number].to_i, :id => @gift_card.code)
+  end
+
+  def fisical
+    authorize @gift_card
+    @gift_cards = apply_scopes(GiftCard)
+    @company = @gift_cards.first.company.gift_card_template_url.nil? ? Company.first : @gift_cards.first.company
+    p "gift cards size: " + @company.gift_card_template_url
+    respond_to do |format|
+      format.html do
+        render :template => 'gift_cards/fisical.html.slim', :layout => false
+      end
+      format.pdf do
+        render  :pdf => "file.pdf", :template => 'gift_cards/fisical.html.slim', :layout => false
+      end
+    end
   end
 
   def edit
@@ -64,7 +90,7 @@ class GiftCardsController < StateController
     return render json: { error: 'wrong_value', message: t('.wrong_value') }, status: 422 unless params[:value].to_i == @gift_card.value.to_i
     if @gift_card.state?(:pending) && @gift_card.expiration_date < Date.today
       @gift_card.expire!
-      return render json: { error: 'expired', message: t('.expired') }, status: 422 
+      return render json: { error: 'expired', message: t('.expired') }, status: 422
     end
     return render json: { error: 'expired', message: t('.expired') }, status: 422 if @gift_card.state?(:expired)
     return render json: { error: 'cant_redeem', message: t('.cant_redeem') }, status: 422 unless @gift_card.can_redeem?

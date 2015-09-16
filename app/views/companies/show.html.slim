@@ -5,7 +5,7 @@ p
   = @company.name
 p
   strong Gift card template:
-  = @company.gift_card_template
+  = image_tag @company.gift_card_template_url(:thumb).to_s
 
 = link_to 'Edit', edit_company_path(@company)
 '|

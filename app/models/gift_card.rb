@@ -4,13 +4,15 @@ class GiftCard < ActiveRecord::Base
   belongs_to :company
 
   validates_presence_of :user, :code, :value, :company
+  
   validates :value, numericality: { only_integer: true }, allow_blank: true
 
   after_initialize :set_initial_code
   before_validation :parameterize_code
 
   scope :expired, ->() { where("gift_cards.expiration_date < ? AND state = ?", Date.today, 'pending') }
-
+  scope :last_gift_cards, ->(last) { GiftCard.last(last) }
+  
   state_machine initial: :pending do
 
     state :pending

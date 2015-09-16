@@ -4,4 +4,6 @@ class Company < ActiveRecord::Base
 
 	validates_presence_of :name, :code
 	validates_uniqueness_of :name, :code
+
+	mount_uploader :gift_card_template, ImageUploader
 end

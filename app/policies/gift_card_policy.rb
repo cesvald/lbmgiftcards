@@ -19,9 +19,12 @@ class GiftCardPolicy < ApplicationPolicy
   def invalidate?
     update?
   end
+  
+  def fisical?
+    update?
+  end
 
   def permitted_attributes
     [:code, :value]
   end
-
 end

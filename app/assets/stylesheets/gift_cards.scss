@@ -1,0 +1,23 @@
+.gift_card_template_container {
+	position: relative;
+	float: left;
+	margin: 10px;
+	margin-top: 0px;
+	margin-left: 0px;
+}
+
+.gift_card_template_value {
+    position: absolute;
+    bottom: 90px;
+    left: 130px;
+    color: white;
+    font-weight: bold;
+    font-size: 23px;
+    font-family: 'Times new roman';
+}
+
+.gift_card_template_code {
+    bottom: -4px;
+    position: absolute;
+    left: 121px;
+}

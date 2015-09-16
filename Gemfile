@@ -34,6 +34,15 @@ gem 'rails-backbone'
 # Other tools
 gem 'has_scope'
 
+# To generate pdf from html
+gem 'wicked_pdf'
+gem 'wkhtmltopdf-binary'
+
+#to upload and manipulate images
+gem "rmagick"
+gem "carrierwave"
+gem 'fog', '>= 1.3.1'
+
 group :test, :development do
   gem 'letter_opener'
   gem 'spring'
