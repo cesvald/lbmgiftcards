@@ -6,7 +6,7 @@
     .columns.small-2
       = link_to t('helpers.submit.create', model: GiftCard.model_name.human), new_gift_card_path, class: 'button small'
     .columns.small-10
-      = button_to "Download PDF", fisical_gift_cards_path({format: "pdf"}.merge(params)), target: :_blank, class: 'button small', method: :get
+      = button_to "Download PDF", fisical_gift_cards_path({format: "pdf"}, params: params, target: :_blank, class: 'button small', method: :get
 
 = form_tag root_path, method: :get, class: 'form-horizontal, margin-top-10' do |f|
   .row.space-10
