@@ -11,7 +11,9 @@ class GiftCard < ActiveRecord::Base
   before_validation :parameterize_code
 
   scope :expired, ->() { where("gift_cards.expiration_date < ? AND state = ?", Date.today, 'pending') }
-  scope :last_gift_cards, ->(last) { GiftCard.last(last) }
+  scope :by_company, ->(company_id) { where("gift_cards.company_id = ?", company_id) }
+  scope :by_state, ->(state) { where(state: state) }
+  scope :last_gift_cards, ->(last) { GiftCard.limit(last).order('created_at desc') }
 
   state_machine initial: :pending do
 

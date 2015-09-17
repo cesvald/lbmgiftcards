@@ -1,5 +1,32 @@
 - content_for :title do
   = GiftCard.model_name.human.pluralize
+
+- if policy(GiftCard.new).new?
+  .row.collapse
+    .columns.small-2
+      = link_to t('helpers.submit.create', model: GiftCard.model_name.human), new_gift_card_path, class: 'button small'
+    .columns.small-10
+      = button_to "Download PDF", fisical_gift_cards_path({format: "pdf"}.merge(params)), target: :_blank, class: 'button small', method: :get
+
+= form_tag root_path, method: :get, class: 'form-horizontal, margin-top-10' do |f|
+  .row.space-10
+    .columns.small-4
+      = label_tag :by_company, 'Company'
+    .columns.small-2
+      = label_tag :by_state, 'State'
+    .columns.small-2
+      = label_tag :last_gift_cards, '# gift cards'
+    .columns.small-4
+  .row
+    .columns.small-4
+      = select_tag :by_company, options_for_select(Company.pluck(:name, :id), params[:by_company]), include_blank: true
+    .columns.small-2
+      = select_tag :by_state, options_for_select(GiftCard.pluck('DISTINCT state'), params[:by_state]), include_blank: true
+    .columns.small-2
+      = text_field_tag :last_gift_cards, params[:last_gift_cards], class: 'input-small'
+    .columns.small-4
+      = submit_tag 'Buscar', class: "small button"
+
 - unless @gift_cards.nil? || @gift_cards.empty?
   table
     thead
@@ -7,10 +34,9 @@
         th= GiftCard.human_attribute_name(:user)
         th= GiftCard.human_attribute_name(:code)
         th= GiftCard.human_attribute_name(:value)
+        th= GiftCard.human_attribute_name(:company)
         th= GiftCard.human_attribute_name(:expiration_date)
         th= GiftCard.human_attribute_name(:state)
         th
     tbody
       = render @gift_cards
-- if policy(GiftCard.new).new?
-  = link_to t('helpers.submit.create', model: GiftCard.model_name.human), new_gift_card_path, class: 'button'

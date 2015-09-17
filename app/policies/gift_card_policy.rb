@@ -11,7 +11,7 @@ class GiftCardPolicy < ApplicationPolicy
     end
 
   end
-  
+
   def redeem?
     update?
   end

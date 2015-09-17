@@ -1,19 +1,24 @@
 class GiftCardsController < StateController
   
-  before_action :set_gift_card, except: [:index, :create, :new]
+  before_action :set_gift_card, except: [:index, :create, :new, :fisical]
 
   after_action :verify_authorized, except: [:index]
-  after_action :verify_policy_scoped, only: [:index]
+  after_action :verify_policy_scoped, only: [:indexs]
 
-  respond_to :html, except: [:redeem]
+  respond_to :html, except: [:redeem, :fisical]
   respond_to :json, only: [:redeem]
+  respond_to :pdf, only: [:fisical]
 
-  has_scope :last_gift_cards
+  has_scope :last_gift_cards, :by_company, :by_state
 
   def index
     expired_gift_cards = GiftCard.expired
     expired_gift_cards.update_all state: 'expired'
-    @gift_cards = policy_scope(GiftCard)
+    if current_user.admin?
+      @gift_cards = apply_scopes(GiftCard).all
+    elsif current_user.regular?
+      @gift_cards = apply_scopes(GiftCard).where(user: current_user)
+    end
     respond_with @gift_cards
   end
 
@@ -48,24 +53,26 @@ class GiftCardsController < StateController
         authorize @gift_card
         @gift_card.save!
         total_gift_cards -= 1
+      rescue ActiveRecord::RecordNotSaved
+        @token_attempts = @token_attempts.to_i + 1
+        puts "token attempts: " + @token_attempts.to_s
+        retry if @token_attempts < @max_retries
+        flash[:notice] = 'No fue posible generar un código válido ' + ((params[:number].to_i - total_gift_cards).to_i).to_s
+        respond_with @gift_card, location: -> { root_path }
+        return
       end
     end
-    redirect_to fisical_gift_cards_path(:format => 'pdf', :last_gift_cards => params[:number].to_i, :id => @gift_card.code)
+    flash[:notice] = 'The gift cards have been created successfully'
+    redirect_to root_path(:last_gift_cards => params[:number].to_i)
   end
 
   def fisical
+    @gift_card = GiftCard.new user: current_user
     authorize @gift_card
-    @gift_cards = apply_scopes(GiftCard)
+    @gift_cards = apply_scopes(GiftCard).all
     @company = @gift_cards.first.company.gift_card_template_url.nil? ? Company.where("gift_card_template IS NOT NULL").first : @gift_cards.first.company
     p "gift cards size: " + @company.gift_card_template_url
-    respond_to do |format|
-      format.html do
-        render :template => 'gift_cards/fisical.html.slim', :layout => false
-      end
-      format.pdf do
-        render  :pdf => "file.pdf", :template => 'gift_cards/fisical.html.slim', :layout => false
-      end
-    end
+    render  :pdf => "file.pdf", :template => 'gift_cards/fisical.html.slim', :layout => false
   end
 
   def edit
