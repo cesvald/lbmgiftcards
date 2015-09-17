@@ -6,5 +6,5 @@
 	= form.input :value
 	= form.input :expiration_date
 	= label_tag :company, 'Company'
-	= select("gift_card", "company_id", Company.all.collect {|c| [ c.name, c.id ] })
+	= select("gift_card", "company_id", Company.pluck(:name, :id))
 	= form.button :submit
