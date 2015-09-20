@@ -1,5 +1,9 @@
 class GiftCardsController < StateController
   
+  require 'rubygems'
+  require 'zip'
+
+
   before_action :set_gift_card, except: [:index, :create, :new, :fisical]
 
   after_action :verify_authorized, except: [:index]
@@ -71,16 +75,31 @@ class GiftCardsController < StateController
     authorize @gift_card
     @gift_cards = apply_scopes(GiftCard).all
     @company = @gift_cards.first.company.gift_card_template_url.nil? ? Company.where("gift_card_template IS NOT NULL").first : @gift_cards.first.company
-    pdf = WickedPdf.new.pdf_from_string(render_to_string('gift_cards/fisical.html.slim', layout: false))
-    save_path = Rails.root.join('','filename.pdf')
-    File.open(save_path, 'wb') do |file|
-      file << pdf
+
+    zip_path = 'public/gift_cards.zip'
+    image_dir_path = 'public/gift_cards'
+    pdf_path = 'public/gift_cards.pdf'
+
+    File.delete(zip_path) if File.exist?(zip_path)
+    File.delete(pdf_path) if File.exist?(pdf_path)
+
+    render  :template => 'gift_cards/fisical.html.slim', :layout => false
+    return
+    render  :pdf => "file.pdf", save_only: true, save_to_file: pdf_path, page_height: 86, page_width: 140, outline: {outline:false, outline_depth: 0}, margin:{ top: 0, bottom: 0, left: 0, right:0 },:template => 'gift_cards/fisical.html.slim', :layout => false
+    imageList = Magick::ImageList.new(pdf_path)
+    Zip::File.open(zip_path, Zip::File::CREATE) do |zipfile|
+      imageList.each_with_index do |image, index|
+        image_path = Rails.root.join('', image_dir_path + '/' + @gift_cards[index].code + '.jpg')
+        image.format = 'JPG'
+        image.to_blob
+        image.write(image_path)
+        zipfile.add(@gift_cards[index].code + '.jpg', image_dir_path + '/' + @gift_cards[index].code + '.jpg')
+      end
     end
-    image = Magick::Image.read('filename.pdf')
-    image[0].format = 'JPG'
-    image[0].to_blob
-    image[0].write('to_file.jpg')
-    #render  :pdf => "file.pdf", :template => 'gift_cards/fisical.html.slim', :layout => false
+
+    FileUtils.rm_rf(Dir.glob(image_dir_path + '/*'))
+
+    send_file(zip_path)
   end
 
   def edit
@@ -130,5 +149,4 @@ class GiftCardsController < StateController
   def transition_state(transition)
     super(@gift_card, transition, root_path)
   end
-
 end
