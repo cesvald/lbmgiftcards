@@ -83,8 +83,8 @@ class GiftCardsController < StateController
     File.delete(zip_path) if File.exist?(zip_path)
     File.delete(pdf_path) if File.exist?(pdf_path)
 
-    render  :template => 'gift_cards/fisical.html.slim', :layout => false
-    return
+    #render  :template => 'gift_cards/fisical.html.slim', :layout => false
+    
     render  :pdf => "file.pdf", save_only: true, save_to_file: pdf_path, page_height: 86, page_width: 140, outline: {outline:false, outline_depth: 0}, margin:{ top: 0, bottom: 0, left: 0, right:0 },:template => 'gift_cards/fisical.html.slim', :layout => false
     imageList = Magick::ImageList.new(pdf_path)
     Zip::File.open(zip_path, Zip::File::CREATE) do |zipfile|
