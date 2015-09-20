@@ -37,6 +37,9 @@ gem 'has_scope'
 # To generate pdf from html
 gem 'wicked_pdf'
 gem 'wkhtmltopdf-binary'
+gem 'imgkit'
+# To generate zip file
+gem 'rubyzip'
 
 #to upload and manipulate images
 gem "rmagick"

@@ -201,6 +201,7 @@ GEM
       rack (>= 1.4.5)
     hike (1.2.3)
     i18n (0.7.0)
+    imgkit (1.6.1)
     inflecto (0.0.2)
     ipaddress (0.8.0)
     jquery-rails (3.1.2)
@@ -278,6 +279,7 @@ GEM
       rspec-mocks (~> 3.3.0)
       rspec-support (~> 3.3.0)
     rspec-support (3.3.0)
+    rubyzip (1.1.7)
     sass (3.3.14)
     sass-rails (5.0.1)
       railties (>= 4.0.0, < 5.0)
@@ -356,6 +358,7 @@ DEPENDENCIES
   foundation-rails
   has_scope
   heroku-deflater (>= 0.4.1)
+  imgkit
   jquery-rails
   letter_opener
   pg
@@ -368,6 +371,7 @@ DEPENDENCIES
   responders
   rmagick
   rspec-rails
+  rubyzip
   sass-rails
   schema_plus
   shoulda

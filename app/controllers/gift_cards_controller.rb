@@ -71,8 +71,16 @@ class GiftCardsController < StateController
     authorize @gift_card
     @gift_cards = apply_scopes(GiftCard).all
     @company = @gift_cards.first.company.gift_card_template_url.nil? ? Company.where("gift_card_template IS NOT NULL").first : @gift_cards.first.company
-    p "gift cards size: " + @company.gift_card_template_url
-    render  :pdf => "file.pdf", :template => 'gift_cards/fisical.html.slim', :layout => false
+    pdf = WickedPdf.new.pdf_from_string(render_to_string('gift_cards/fisical.html.slim', layout: false))
+    save_path = Rails.root.join('','filename.pdf')
+    File.open(save_path, 'wb') do |file|
+      file << pdf
+    end
+    image = Magick::Image.read('filename.pdf')
+    image[0].format = 'JPG'
+    image[0].to_blob
+    image[0].write('to_file.jpg')
+    #render  :pdf => "file.pdf", :template => 'gift_cards/fisical.html.slim', :layout => false
   end
 
   def edit
