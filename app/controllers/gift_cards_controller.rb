@@ -89,8 +89,8 @@ class GiftCardsController < StateController
     respond_to do |format|
       format.html {
         imageList = Magick::ImageList.new(pdf_path) do
-          self.quality = 100
-          self.density = '100'
+          self.quality = 80
+          self.density = '80'
         end
 
         Zip::File.open(zip_path, Zip::File::CREATE) do |zipfile|
