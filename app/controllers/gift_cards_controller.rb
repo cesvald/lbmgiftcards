@@ -93,11 +93,12 @@ class GiftCardsController < StateController
 
       Zip::File.open(zip_path, Zip::File::CREATE) do |zipfile|
         imageList.each_with_index do |image, index|
-          image_path = Rails.root.join('', image_dir_path + '/' + @gift_cards[index].code + '.jpg')
+          image_name = @gift_cards[index].code + '.jpg'
+          image_path = image_dir_path + '/' + image_name)
           image.format = 'JPG'
           image.to_blob
           image.write(image_path)
-          zipfile.add(@gift_cards[index].code + '.jpg', image_dir_path + '/' + @gift_cards[index].code + '.jpg')
+          zipfile.add(image_name, image_dir_path + '/' + image_name)
         end
       end
 
