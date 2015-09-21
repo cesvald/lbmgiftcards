@@ -94,7 +94,7 @@ class GiftCardsController < StateController
       Zip::File.open(zip_path, Zip::File::CREATE) do |zipfile|
         imageList.each_with_index do |image, index|
           image_name = @gift_cards[index].code + '.jpg'
-          image_path = image_dir_path + '/' + image_name)
+          image_path = image_dir_path + '/' + image_name
           image.format = 'JPG'
           image.to_blob
           image.write(image_path)
