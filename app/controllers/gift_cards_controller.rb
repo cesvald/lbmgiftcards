@@ -75,9 +75,9 @@ class GiftCardsController < StateController
     @gift_cards = apply_scopes(GiftCard).all
     @company = @gift_cards.first.company.gift_card_template_url.nil? ? Company.where("gift_card_template IS NOT NULL").first : @gift_cards.first.company
     
-    zip_path = 'private/gift_cards.zip'
-    image_dir_path = 'private/gift_cards'
-    pdf_path = 'private/gift_cards.pdf'
+    zip_path = '/private/gift_cards.zip'
+    image_dir_path = '/private/gift_cards'
+    pdf_path = '/private/gift_cards.pdf'
 
     File.delete(zip_path) if File.exist?(zip_path)
     File.delete(pdf_path) if File.exist?(pdf_path)
