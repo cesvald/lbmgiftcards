@@ -1,2 +1,2 @@
-= stylesheet_link_tag "application"
-= render partial: "fisical_gift_card", collection: @gift_cards, locals: {company_url: @company.gift_card_template_url(:thumb)}
+= wicked_pdf_stylesheet_link_tag "application"
+= render partial: "fisical_gift_card", collection: @gift_cards, locals: {company_url: @company.gift_card_template_url}

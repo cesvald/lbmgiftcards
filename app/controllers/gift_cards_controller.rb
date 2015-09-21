@@ -1,15 +1,11 @@
 class GiftCardsController < StateController
   
-  require 'rubygems'
-  require 'zip'
-
-
   before_action :set_gift_card, except: [:index, :create, :new, :fisical]
 
   after_action :verify_authorized, except: [:index]
   after_action :verify_policy_scoped, only: [:indexs]
 
-  respond_to :html, except: [:redeem, :fisical]
+  respond_to :html, except: [:redeem]
   respond_to :json, only: [:redeem]
   respond_to :pdf, only: [:fisical]
 
@@ -75,7 +71,7 @@ class GiftCardsController < StateController
     authorize @gift_card
     @gift_cards = apply_scopes(GiftCard).all
     @company = @gift_cards.first.company.gift_card_template_url.nil? ? Company.where("gift_card_template IS NOT NULL").first : @gift_cards.first.company
-
+    
     zip_path = 'public/gift_cards.zip'
     image_dir_path = 'public/gift_cards'
     pdf_path = 'public/gift_cards.pdf'
@@ -83,23 +79,33 @@ class GiftCardsController < StateController
     File.delete(zip_path) if File.exist?(zip_path)
     File.delete(pdf_path) if File.exist?(pdf_path)
 
-    #render  :template => 'gift_cards/fisical.html.slim', :layout => false
-    
-    render  :pdf => "file.pdf", save_only: true, save_to_file: pdf_path, page_height: 86, page_width: 140, outline: {outline:false, outline_depth: 0}, margin:{ top: 0, bottom: 0, left: 0, right:0 },:template => 'gift_cards/fisical.html.slim', :layout => false
-    imageList = Magick::ImageList.new(pdf_path)
-    Zip::File.open(zip_path, Zip::File::CREATE) do |zipfile|
-      imageList.each_with_index do |image, index|
-        image_path = Rails.root.join('', image_dir_path + '/' + @gift_cards[index].code + '.jpg')
-        image.format = 'JPG'
-        image.to_blob
-        image.write(image_path)
-        zipfile.add(@gift_cards[index].code + '.jpg', image_dir_path + '/' + @gift_cards[index].code + '.jpg')
+    render  :pdf => "file.pdf", save_only: true, save_to_file: pdf_path, lowquality: false, page_height: 110, page_width: 180, outline: {outline:false, outline_depth: 0}, margin:{ top: 0, bottom: 0, left: 0, right:0 },:template => 'gift_cards/fisical.html.slim', :layout => false
+
+    respond_to do |format|
+      format.html {
+        imageList = Magick::ImageList.new(pdf_path) do
+        self.quality = 100
+        self.density = '100'
       end
+
+      Zip::File.open(zip_path, Zip::File::CREATE) do |zipfile|
+        imageList.each_with_index do |image, index|
+          image_path = Rails.root.join('', image_dir_path + '/' + @gift_cards[index].code + '.jpg')
+          image.format = 'JPG'
+          image.to_blob
+          image.write(image_path)
+          zipfile.add(@gift_cards[index].code + '.jpg', image_dir_path + '/' + @gift_cards[index].code + '.jpg')
+        end
+      end
+
+      FileUtils.rm_rf(Dir.glob(image_dir_path + '/*'))
+      send_file(zip_path)
+      }
+      format.pdf {
+        send_file(pdf_path)
+      }
     end
-
-    FileUtils.rm_rf(Dir.glob(image_dir_path + '/*'))
-
-    send_file(zip_path)
+    #render  :template => 'gift_cards/fisical.html.slim', :layout => false
   end
 
   def edit
