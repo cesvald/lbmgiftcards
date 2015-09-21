@@ -81,29 +81,31 @@ class GiftCardsController < StateController
 
     File.delete(zip_path) if File.exist?(zip_path)
     File.delete(pdf_path) if File.exist?(pdf_path)
+    FileUtils.mkdir_p('private') unless File.directory?('private')
+    FileUtils.mkdir_p('private/gift_cards') unless File.directory?('private/gift_cards')
 
     render  :pdf => "file.pdf", save_only: true, save_to_file: pdf_path, lowquality: false, page_height: 110, page_width: 180, outline: {outline:false, outline_depth: 0}, margin:{ top: 0, bottom: 0, left: 0, right:0 },:template => 'gift_cards/fisical.html.slim', :layout => false
 
     respond_to do |format|
       format.html {
         imageList = Magick::ImageList.new(pdf_path) do
-        self.quality = 100
-        self.density = '100'
-      end
-
-      Zip::File.open(zip_path, Zip::File::CREATE) do |zipfile|
-        imageList.each_with_index do |image, index|
-          image_name = @gift_cards[index].code + '.jpg'
-          image_path = image_dir_path + '/' + image_name
-          image.format = 'JPG'
-          image.to_blob
-          image.write(image_path)
-          zipfile.add(image_name, image_dir_path + '/' + image_name)
+          self.quality = 100
+          self.density = '100'
         end
-      end
 
-      FileUtils.rm_rf(Dir.glob(image_dir_path + '/*'))
-      send_file(zip_path)
+        Zip::File.open(zip_path, Zip::File::CREATE) do |zipfile|
+          imageList.each_with_index do |image, index|
+            image_name = @gift_cards[index].code + '.jpg'
+            image_path = image_dir_path + '/' + image_name
+            image.format = 'JPG'
+            image.to_blob
+            image.write(image_path)
+            zipfile.add(image_name, image_dir_path + '/' + image_name)
+          end
+        end
+
+        FileUtils.rm_rf(Dir.glob(image_dir_path + '/*'))
+        send_file(zip_path)
       }
       format.pdf {
         send_file(pdf_path)
