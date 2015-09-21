@@ -1,5 +1,8 @@
 class GiftCardsController < StateController
   
+  require 'rubygems'
+  require 'zip'
+
   before_action :set_gift_card, except: [:index, :create, :new, :fisical]
 
   after_action :verify_authorized, except: [:index]
