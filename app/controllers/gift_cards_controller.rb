@@ -75,7 +75,7 @@ class GiftCardsController < StateController
     @gift_cards = apply_scopes(GiftCard).all
     @company = @gift_cards.first.company.gift_card_template_url.nil? ? Company.where("gift_card_template IS NOT NULL").first : @gift_cards.first.company
     
-    zip_path = 'private/gift_card.zip'
+    zip_path = 'private/gift_cards.zip'
     image_dir_path = 'private/gift_cards'
     pdf_path = 'private/gift_cards.pdf'
 
@@ -93,12 +93,11 @@ class GiftCardsController < StateController
 
       Zip::File.open(zip_path, Zip::File::CREATE) do |zipfile|
         imageList.each_with_index do |image, index|
-          image_name = @gift_cards[index].code + '.jpg'
-          image_path = image_dir_path + image_name
+          image_path = Rails.root.join('', image_dir_path + '/' + @gift_cards[index].code + '.jpg')
           image.format = 'JPG'
           image.to_blob
           image.write(image_path)
-          zipfile.add(image_name, image_dir_path + image_name)
+          zipfile.add(@gift_cards[index].code + '.jpg', image_dir_path + '/' + @gift_cards[index].code + '.jpg')
         end
       end
 
